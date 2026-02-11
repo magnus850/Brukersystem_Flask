@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 import mariadb
 import os
@@ -14,18 +14,37 @@ conn = mariadb.connect(
     )
 
 cur = conn.cursor()
-
 app = Flask(__name__)
 CORS(app)
+
+def brukernavn_sjekk(brukernavn, passord):
+    cur.execute(
+        'SELECT id, passord FROM brukere WHERE bruker =%s AND passord = %s',
+        (brukernavn, passord))
+    resultat = cur.fetchone()
+    print(resultat)
+    if resultat == None:
+        return 'Feil brukernavn og/eller passord' 
+    else: return 'Riktig brukernavn og passord'
+    
+#routes
 @app.route("/")
 def forside():
     cur.execute("select * from brukere;")
     data = cur.fetchall()
     return jsonify({"brukere":data})
 
-@app.route("/logginn")
+@app.route("/inputdata", methods=['POST'])
 def logg_inn_side():
-    cur.execute()
+    data = request.json
+    brukernavn = (data.get('brukernavn'))
+    passord = (data.get('passord'))
+    melding = brukernavn_sjekk(brukernavn, passord)
+    return melding
+    
+
+    
 
 if __name__ == "__main__":
     app.run(debug=True)
+    

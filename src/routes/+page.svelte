@@ -11,4 +11,6 @@
 <button on:click={hent_data}>Hent data</button>
 <p>{brukere}</p>
 
-<a href="/logginn">Logg inn</a>
+<a href="/innlogging">Logg inn</a>
+<br />
+<a href="/registrering">Registrer deg</a>
