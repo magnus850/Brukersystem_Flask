@@ -27,6 +27,19 @@ def brukernavn_sjekk(brukernavn, passord):
         return 'Feil brukernavn og/eller passord' 
     else: return 'Riktig brukernavn og passord'
     
+def registrer_bruker(brukernavn, passord):
+    cur.execute('select bruker from brukere where bruker = %s',
+            (brukernavn,))
+    if cur.fetchone() != None:
+        return 'Brukernavn er tatt, velg et annet'
+    elif cur.fetchone() == None: 
+        cur.execute(
+        'insert into brukere (bruker, passord) values (%s, %s)',
+        (brukernavn, passord))
+        conn.commit()
+        return f"Du har lagd en ny bruker kalt: {brukernavn}"
+
+    
 #routes
 @app.route("/")
 def forside():
@@ -42,8 +55,13 @@ def logg_inn_side():
     melding = brukernavn_sjekk(brukernavn, passord)
     return melding
     
-
-    
+@app.route("/regdata", methods=['POST'])
+def registrerings_side():
+    data = request.json
+    brukernavn = (data.get('brukernavn'))
+    passord = (data.get('passord'))
+    melding = registrer_bruker(brukernavn, passord)
+    return melding
 
 if __name__ == "__main__":
     app.run(debug=True)
