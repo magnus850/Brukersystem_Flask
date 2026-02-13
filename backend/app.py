@@ -17,15 +17,20 @@ cur = conn.cursor()
 app = Flask(__name__)
 CORS(app)
 
-def brukernavn_sjekk(brukernavn, passord):
+def bruker_sjekk(brukernavn, passord):
     cur.execute(
-        'SELECT id, passord FROM brukere WHERE bruker =%s AND passord = %s',
+        'SELECT id, passord, tillatelse FROM brukere WHERE bruker =%s AND passord = %s',
         (brukernavn, passord))
     resultat = cur.fetchone()
-    print(resultat)
     if resultat == None:
-        return 'Feil brukernavn og/eller passord' 
-    else: return 'Riktig brukernavn og passord'
+        suksess = False
+        return suksess, None 
+    elif resultat: 
+        resultat_liste = list(resultat)
+        tillatelse = resultat_liste[2]
+        suksess = True
+        return suksess, tillatelse
+    
     
 def registrer_bruker(brukernavn, passord):
     cur.execute('select bruker from brukere where bruker = %s',
@@ -47,21 +52,25 @@ def forside():
     data = cur.fetchall()
     return jsonify({"brukere":data})
 
+#innlogging
 @app.route("/inputdata", methods=['POST'])
 def logg_inn_side():
     data = request.json
     brukernavn = (data.get('brukernavn'))
     passord = (data.get('passord'))
-    melding = brukernavn_sjekk(brukernavn, passord)
-    return melding
-    
+    suksess, tillatelse = bruker_sjekk(brukernavn, passord)
+    print(suksess, tillatelse)
+    return jsonify({'suksess': suksess, 'tillatelse': tillatelse})
+
+
+#registrering    
 @app.route("/regdata", methods=['POST'])
 def registrerings_side():
     data = request.json
     brukernavn = (data.get('brukernavn'))
     passord = (data.get('passord'))
-    melding = registrer_bruker(brukernavn, passord)
-    return melding
+    melding, tillatelse = registrer_bruker(brukernavn, passord)
+    return jsonify (melding, tillatelse)
 
 if __name__ == "__main__":
     app.run(debug=True)
