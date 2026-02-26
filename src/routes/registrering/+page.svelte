@@ -25,7 +25,7 @@
     tillatelse = data.tillatelse;
     if (tillatelse == "admin") {
       goto(
-        `/admin?brukernavn=${encodeURIComponent(brukernavn)}&tillatelse=${encodeURIComponent(tillatelse)}`,
+        `/admin?brukernavn=${encodeURIComponent(brukernavn)}&tillatelse=${encodeURIComponent(tillatelse)}&id=${encodeURIComponent(id)}`,
       );
     } else if (tillatelse == "bruker") {
       goto(

@@ -15,29 +15,31 @@ conn = mariadb.connect(
 
 cur = conn.cursor()
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 def bruker_sjekk(brukernavn, passord):
     cur.execute(
-        'SELECT passord, tillatelse FROM brukere WHERE bruker =%s AND passord = %s',
+        'SELECT id, passord, tillatelse FROM brukere WHERE bruker =%s AND passord = %s',
         (brukernavn, passord))
     resultat = cur.fetchone()
     if resultat == None:
         suksess = False
-        return suksess, None 
+        return suksess, None, None 
     elif resultat: 
         resultat_liste = list(resultat)
-        tillatelse = resultat_liste[1]
+        tillatelse = resultat_liste[2]
+        id = resultat_liste[0]
         suksess = True
-        return suksess, tillatelse
+        return suksess, tillatelse, id
     
     
 def registrer_bruker(brukernavn, passord):
     cur.execute('select bruker from brukere where bruker = %s',
             (brukernavn,))
-    if cur.fetchone() != None:
+    resultat = cur.fetchone()
+    if resultat != None:
         return 'Brukernavn er tatt, velg et annet', None, None
-    elif cur.fetchone() == None: 
+    elif resultat == None: 
         cur.execute(
         'insert into brukere (bruker, passord) values (%s, %s)',
         (brukernavn, passord))
@@ -51,9 +53,16 @@ def registrer_bruker(brukernavn, passord):
 def alle_brukere(brukernavn):
     cur.execute("select id, bruker, tillatelse from brukere where bruker !=%s",
                 (brukernavn,))
-    resultat = cur.fetchall()
-    if resultat: return resultat
+    return cur.fetchall()
     
+def slett_bruker_fra_db(id):
+    int_id = int(id)
+    print (int_id)
+    cur.execute("delete from brukere where id =%s",
+                (int_id,))
+    conn.commit()
+    return True
+
 #routes
 @app.route("/")
 def forside():
@@ -67,10 +76,9 @@ def logg_inn_side():
     data = request.json
     brukernavn = (data.get('brukernavn'))
     passord = (data.get('passord'))
-    suksess, tillatelse = bruker_sjekk(brukernavn, passord)
-    print(suksess, tillatelse)
-    return jsonify({'suksess': suksess, 'tillatelse': tillatelse})
-
+    suksess, tillatelse, id = bruker_sjekk(brukernavn, passord)
+    print(suksess, tillatelse, id)
+    return jsonify({'suksess': suksess, 'tillatelse': tillatelse, 'id': id})
 
 #registrering    
 @app.route("/regdata", methods=['POST'])
@@ -78,8 +86,8 @@ def registrerings_side():
     data = request.json
     brukernavn = (data.get('brukernavn'))
     passord = (data.get('passord'))
-    melding, brukernavn, tillatelse = registrer_bruker(brukernavn, passord)
-    return jsonify ({'melding': melding, 'tillatelse': tillatelse, 'brukernavn': brukernavn})
+    melding, brukernavn, tillatelse, id = registrer_bruker(brukernavn, passord)
+    return jsonify ({'melding': melding, 'brukernavn': brukernavn, 'tillatelse': tillatelse, 'id': id})
 
 #brukeroversikt for admins
 @app.route("/brukerdb", methods=['POST'])
@@ -89,6 +97,14 @@ def hent_brukere():
     brukere = alle_brukere(brukernavn)
     return jsonify ({'brukere': brukere})
 
+#sletting av brukere for admins
+@app.route("/slettbruker", methods=['POST'])
+def slett_bruker():
+    data = request.json
+    id = data.get('id')
+    bruker_slettet = slett_bruker_fra_db(id)
+    return jsonify ({'brukerslettet': bruker_slettet})
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)
     

@@ -3,5 +3,6 @@ export function load({ url }) {
     url.searchParams.get("brukernavn") || "fant ikke brukernavn";
   const tillatelse =
     url.searchParams.get("tillatelse") || "fant ikke tillatelse";
-  return { brukernavn, tillatelse };
+  const id = url.searchParams.get("id") || "fant ikke id";
+  return { brukernavn, tillatelse, id };
 }

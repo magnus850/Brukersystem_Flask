@@ -4,6 +4,7 @@
   let brukernavn = "";
   let passord = "";
   let tillatelse = "";
+  let id = "";
   let suksess = false;
 
   async function logg_inn() {
@@ -15,13 +16,14 @@
     const data = await respons.json();
     tillatelse = data.tillatelse;
     suksess = data.suksess;
+    id = data.id;
     if (suksess && tillatelse == "admin") {
       goto(
-        `/admin?brukernavn=${encodeURIComponent(brukernavn)}&tillatelse=${encodeURIComponent(tillatelse)}`,
+        `/admin?brukernavn=${encodeURIComponent(brukernavn)}&tillatelse=${encodeURIComponent(tillatelse)}&id=${encodeURIComponent(id)}`,
       );
     } else if (suksess && tillatelse == "bruker") {
       goto(
-        `/bruker?brukernavn=${encodeURIComponent(brukernavn)}&tillatelse=${encodeURIComponent(tillatelse)}`,
+        `/bruker?brukernavn=${encodeURIComponent(brukernavn)}&tillatelse=${encodeURIComponent(tillatelse)}&id=${encodeURIComponent(id)}`,
       );
     }
   }
