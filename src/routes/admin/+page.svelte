@@ -87,6 +87,23 @@
   function logg_ut() {
     goto(`/`);
   }
+
+  async function gi_bruker_admin(bruker) {
+    const svar = confirm(
+      `Er du sikker på at du vil gi bruker ${bruker[1]} admintilgang?`,
+    );
+    if (svar) {
+      let id = bruker[0];
+      const respons = await fetch("http://127.0.0.1:5000/tillatelseendring", {
+        method: "POST",
+        body: JSON.stringify({ id }),
+        headers: { "Content-Type": "application/json" },
+      });
+      hent_brukere();
+    } else {
+      return;
+    }
+  }
 </script>
 
 <h1>Hei {data.tillatelse} {brukernavn}</h1>
@@ -103,10 +120,15 @@
   {#each brukere as bruker}
     <tbody>
       <tr>
-        <th>{bruker[0]}</th>
-        <th>{bruker[1]}</th>
-        <th>{bruker[2]}</th>
-        <th><button on:click={() => slett_bruker(bruker)}>Slett</button></th>
+        <td>{bruker[0]}</td>
+        <td>{bruker[1]}</td>
+        <td>{bruker[2]}</td>
+        <td class="table-actions">
+          {#if bruker[2] === "bruker"}
+            <button on:click={() => slett_bruker(bruker)}>Slett</button>
+            <button on:click={() => gi_bruker_admin(bruker)}>Gi admin</button>
+          {/if}
+        </td>
       </tr>
     </tbody>
   {/each}
@@ -120,4 +142,6 @@
   <input type="password" id="passord" bind:value={passord} />
   <button on:click={() => sjekk_lengde()}>Bekreft</button>
 {/if}
-<p>{@html string}</p>
+{#if string}
+  <p class="message">{@html string}</p>
+{/if}

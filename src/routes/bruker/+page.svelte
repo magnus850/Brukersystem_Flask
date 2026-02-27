@@ -69,4 +69,6 @@
   <input type="password" id="passord" bind:value={passord} />
   <button on:click={() => sjekk_lengde()}>Bekreft</button>
 {/if}
-<p>{@html string}</p>
+{#if string}
+  <p class="message">{@html string}</p>
+{/if}

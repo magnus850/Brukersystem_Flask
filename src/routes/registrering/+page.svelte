@@ -73,5 +73,9 @@
 
 <button on:click={sjekk_lengde}>Registrer</button>
 <br />
-<p>{@html string1}</p>
-<p>{@html string2}</p>
+{#if string1}
+  <p class="message">{@html string1}</p>
+{/if}
+{#if string2}
+  <p class="message">{@html string2}</p>
+{/if}

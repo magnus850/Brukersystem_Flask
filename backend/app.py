@@ -74,6 +74,12 @@ def endre_passord_db(id, nytt_passord):
         (nytt_passord, id))
         conn.commit()
         return True
+    
+def endre_tillatelse(id):
+    cur.execute('update brukere set tillatelse=%s where id=%s',
+                ('admin', id))
+    conn.commit()
+    return "Vellykket tillatelse-endring"
 
 #routes
 @app.route("/")
@@ -89,7 +95,6 @@ def logg_inn_side_route():
     brukernavn = (data.get('brukernavn'))
     passord = (data.get('passord'))
     suksess, tillatelse, id = bruker_sjekk(brukernavn, passord)
-    print(suksess, tillatelse, id)
     return jsonify({'suksess': suksess, 'tillatelse': tillatelse, 'id': id})
 
 #registrering    
@@ -124,6 +129,13 @@ def endre_passord_route():
     nytt_passord = data.get('nytt_passord')
     passord_endret = endre_passord_db(id, nytt_passord)
     return jsonify ({'passordendret': passord_endret})
+
+@app.route("/tillatelseendring", methods=['POST'])
+def endre_tillatelse_route():
+    data=request.json
+    id = data.get('id')
+    melding = endre_tillatelse(id)
+    return melding
     
 if __name__ == "__main__":
     app.run(debug=True)

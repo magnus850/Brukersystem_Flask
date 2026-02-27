@@ -6,6 +6,7 @@
   let tillatelse = "";
   let id = "";
   let suksess = false;
+  let string = "";
 
   async function logg_inn() {
     const respons = await fetch("http://127.0.0.1:5000/inputdata", {
@@ -25,6 +26,8 @@
       goto(
         `/bruker?brukernavn=${encodeURIComponent(brukernavn)}&tillatelse=${encodeURIComponent(tillatelse)}&id=${encodeURIComponent(id)}`,
       );
+    } else if (suksess == false) {
+      string = "Feil brukernavn og/eller passord";
     }
   }
 </script>
@@ -37,3 +40,6 @@
 <input type="password" id="passord" bind:value={passord} />
 
 <button on:click={logg_inn}>Logg inn</button>
+{#if string}
+  <p class="message">{@html string}</p>
+{/if}
