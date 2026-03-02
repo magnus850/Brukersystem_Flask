@@ -10,8 +10,8 @@ conn = mariadb.connect(
     password= os.getenv('DB_PASSORD'),
     host = os.getenv('DB_HOST'),
     database = os.getenv('DB'),
-    unix_socket = '/opt/homebrew/var/mysql/mysql.sock'
-    )
+    **({"unix_socket": os.getenv('DB_SOCKET')} if os.getenv('DB_SOCKET') else {})
+)
 
 cur = conn.cursor()
 app = Flask(__name__)
