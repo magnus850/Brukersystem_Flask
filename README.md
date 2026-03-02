@@ -1,65 +1,75 @@
-# Svelte library
+# Brukersystem Web
 
-Everything you need to build a Svelte library, powered by [`sv`](https://npmjs.com/package/sv).
+Et brukerautentiseringssystem med innlogging, registrering og adminpanel bygget med Svelte og Flask. Alt bortsett fra styling er kodet selv, styling er vibekodet med gpt-5 mini.
 
-Read more about creating a library [in the docs](https://svelte.dev/docs/kit/packaging).
+## Teknologier
 
-## Creating a project
+- **Frontend:** Svelte
+- **Backend:** Flask (Python)
+- **Database:** MariaDB
 
-If you're seeing this, you've probably already done this step. Congrats!
+## Oppsett
 
-```sh
-# create a new project in the current directory
-npx sv create
+Du må ha Python, Node.js og MariaDB konfigurert og installert fra før av. Tilpasset Mac.
 
-# create a new project in my-app
-npx sv create my-app
+Åpne terminalen og kjør disse kommandoene etter hverandre:
+```bash
+mkdir ikke_mitt_prosjekt && cd ikke_mitt_prosjekt
+git clone https://github.com/magnus850/Brukersystem_Web && cd Brukersystem_Web
+python3 -m venv venv
+source venv/bin/activate
+pip3 install flask flask-cors mariadb python-dotenv
 ```
 
-To recreate this project with the same configuration:
-
-```sh
-# recreate this project
-npx sv create --template library --types jsdoc --install npm ./
+Åpne et nytt terminalvindu og logg inn på MariaDB:
+```bash
+mariadb -u brukernavn -p
 ```
 
-## Developing
+> Får du feil er det mest sannsynlig fordi MariaDB ikke kjører. Skriv `brew services start mariadb` og prøv igjen.
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+Kjør disse kommandoene i MariaDB:
+```sql
+CREATE DATABASE brukerdb;
+USE brukerdb;
+CREATE TABLE brukere (
+    id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    bruker VARCHAR(15) NOT NULL,
+    passord VARCHAR(24) NOT NULL,
+    tillatelse VARCHAR(20) NOT NULL DEFAULT 'bruker'
+);
+INSERT INTO brukere (bruker, passord, tillatelse) VALUES ('admin123', 'passord123', 'admin');
+```
 
-```sh
+Tilbake i første terminal, opprett `.env`-filen:
+```bash
+touch .env && nano .env
+```
+
+Lim inn og fyll inn med egen MariaDB-brukerlegitimasjon:
+```env
+DB_BRUKER=brukernavn
+DB_PASSORD=passord
+DB_HOST=localhost
+DB=brukerdb
+```
+
+Lagre med `Ctrl+X` -> `Y` -> `Enter`. Installer deretter frontend:
+```bash
+npm install svelte
+```
+
+## Kjøring
+
+Start backend (pass på at venv er aktivert):
+```bash
+source venv/bin/activate
+python3 backend/app.py
+```
+
+Åpne et nytt terminalvindu og start frontend:
+```bash
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-Everything inside `src/lib` is part of your library, everything inside `src/routes` can be used as a showcase or preview app.
-
-## Building
-
-To build your library:
-
-```sh
-npm pack
-```
-
-To create a production version of your showcase app:
-
-```sh
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
-
-## Publishing
-
-Go into the `package.json` and give your package the desired name through the `"name"` option. Also consider adding a `"license"` field and point it to a `LICENSE` file which you can create from a template (one popular option is the [MIT license](https://opensource.org/license/mit/)).
-
-To publish your library to [npm](https://www.npmjs.com):
-
-```sh
-npm publish
-```
+Gå til [http://localhost:5173](http://localhost:5173) og logg inn med `admin123` / `passord123`.
